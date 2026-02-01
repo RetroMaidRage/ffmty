@@ -7,7 +7,7 @@ import configparser
 import timestamps
 
 if getattr(sys, 'frozen', False):
-    base_path = os.path.dirname(sys.executable)  # путь к папке exe
+    base_path = os.path.dirname(sys.executable)
 else:
     base_path = os.path.abspath(".")
 
@@ -65,7 +65,6 @@ def all_mp3_files():
     for file in directory:
         if file.lower().endswith(".mp3"):
             mp3_files.append(file)
-            #print(directory_files)
 
             print(file)
             found = True
