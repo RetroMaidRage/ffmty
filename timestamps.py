@@ -3,9 +3,12 @@ from mutagen.mp3 import MP3
 from datetime import timedelta
 import os
 
-def create_timestamps(list_path, filename, base_path):
+hours = 0
+minutes = 0
+seconds = 0
+def create_timestamps(list_path, filename, base_path, timestamps_path):
+    global hours, minutes, seconds
     concat_file = list_path
-    timestamps_path = os.path.join(base_path, f"timestamps_{filename}.txt")
     overall_duration = 0
 
     with open(concat_file, 'r', encoding='utf-8') as f:
@@ -22,7 +25,7 @@ def create_timestamps(list_path, filename, base_path):
     with open(timestamps_path, "w", encoding="utf-8") as f:
         current_time = 0.0
         for mp3 in mp3_files:
-            full_path = os.path.join(base_path, mp3)
+            full_path = os.path.join(base_path, "ffmty/output", mp3)
             if not os.path.isfile(full_path):
                 print(f"File not found: {mp3}")
                 continue
@@ -36,5 +39,6 @@ def create_timestamps(list_path, filename, base_path):
 
     minutes = int(overall_duration // 60)
     seconds = int(overall_duration % 60)
-    print(f"\nOvearall duration: {minutes} min {seconds} sec.\n")
+    hours = int(seconds / 60 / 60)
+    print(f"\nOvearall duration: {hours} h. {minutes} min. {seconds} sec.\n")
     print(f"Timestamps list path: {timestamps_path}\n")

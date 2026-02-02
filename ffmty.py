@@ -17,12 +17,18 @@ config['Settings'] =    {'Codec': 'h264',
 
 filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
+output_folder = os.path.join(base_path, "ffmty/output")
+render_folder = os.path.join(base_path, "ffmty/render")
+os.makedirs(output_folder, exist_ok=True)
+os.makedirs(render_folder, exist_ok=True)
+
 config_path = os.path.join(base_path, "ffmty/settings.ini")
-list_path = os.path.join(base_path, f"list_{filename}.txt")
-mp3_output = os.path.join(base_path, f"output_{filename}.mp3")
-video_output = os.path.join(base_path, f"output_{filename}.mp4")
+list_path = os.path.join(base_path, f"ffmty/output/list_{filename}.txt")
+mp3_output = os.path.join(base_path, f"ffmty/render/output_{filename}.mp3")
+video_output = os.path.join(base_path, f"ffmty/render/output_{filename}.mp4")
+timestamps_path = os.path.join(base_path, f"ffmty/output/timestamps_{filename}.txt")
 image = os.path.join(base_path, "0.png")
-timestamps_path = os.path.join(base_path, f"timestamps_{filename}.txt")
+
 
 if os.path.isfile(config_path):
     print("Config file detected.")
@@ -80,10 +86,10 @@ def create_mp3():
 
     with open(list_path, "w", encoding="utf-8") as f:
         for file in mp3_files:
-            f.write(f"file '{file}'\n")
+            f.write(f"file '{os.path.abspath(file)}'\n")
 
-    timestamps.create_timestamps(list_path, filename, base_path)
-
+    timestamps.create_timestamps(list_path, filename, base_path, timestamps_path)
+    time.sleep(2)
     subprocess.run([
         "ffmpeg",
         "-f", "concat",
@@ -94,19 +100,39 @@ def create_mp3():
     ], check=True)
 
 def create_video(image):
-    subprocess.run([
-        "ffmpeg",
-        "-y",
-        "-loop", "1",
-        "-i", image,
-        "-i", mp3_output,
-        "-c:a", "copy",
-        "-c:v", codec,
-        "-preset", presset,
-        "-shortest",
-        video_output
-    ], check=True)
+    max_seconds = 12 * 3599
 
+    total_seconds = int(timestamps.seconds)
+
+    parts = (total_seconds + max_seconds - 1) // max_seconds
+    if parts > 1:
+        print("Video longer than 12 hours. Separating into two parts")
+
+    for i in range(parts):
+        start = i * max_seconds
+        duration = min(max_seconds, total_seconds - start)
+
+        output = video_output.replace(".mp4", f"_part{i+1}.mp4")
+
+        subprocess.run([
+            "ffmpeg",
+            "-y",
+            "-ss", str(start),
+            "-t", str(duration),
+            "-loop", "1",
+            "-i", image,
+            "-i", mp3_output,
+            "-c:a", "copy",
+            "-c:v", codec,
+            "-preset", presset,
+            "-shortest",
+            "-vf",
+            "scale=1920:1080:force_original_aspect_ratio=decrease,"
+            "pad=1920:1080:(ow-iw)/2:(oh-ih)/2",
+            output
+        ], check=True)
+
+        print(f"Video part {i+1} done: {output}")
     print(f"Video is done: {video_output}")
 
 
