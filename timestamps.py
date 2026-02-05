@@ -5,9 +5,10 @@ import os
 
 hours = 0
 minutes = 0
+overall_duration = 0
 seconds = 0
 def create_timestamps(list_path, filename, base_path, timestamps_path):
-    global hours, minutes, seconds
+    global hours, minutes, seconds, overall_duration
     concat_file = list_path
     overall_duration = 0
 

@@ -19,6 +19,7 @@ filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 output_folder = os.path.join(base_path, "ffmty/output")
 render_folder = os.path.join(base_path, "ffmty/render")
+
 os.makedirs(output_folder, exist_ok=True)
 os.makedirs(render_folder, exist_ok=True)
 
@@ -34,7 +35,6 @@ if os.path.isfile(config_path):
     print("Config file detected.")
 else:
     print("No config file. Creating...")
-    os.mkdir("ffmty")
     with open(config_path, "w") as configfile:
         configfile.write("# Image in execute folder with name 0.png will be used as image cover if you want this.\n")
         configfile.write("# Codecs: h264 h265 h264_nvenc h265_nvenc mpeg4 av1\n")
@@ -76,7 +76,7 @@ def all_mp3_files():
             found = True
 
     if found == False:
-        print("There no .mp3 files.")
+        print("There no .mp3 files.\n")
         a = input("Press Enter to exit...")
         if a:
             sys.exit(0)
@@ -102,17 +102,19 @@ def create_mp3():
 def create_video(image):
     max_seconds = 12 * 3599
 
-    total_seconds = int(timestamps.seconds)
+    total_seconds = int(timestamps.overall_duration)
+    print(total_seconds)
 
     parts = (total_seconds + max_seconds - 1) // max_seconds
     if parts > 1:
-        print("Video longer than 12 hours. Separating into two parts")
+        print("Video is longer than 12 hours. Separating into two parts")
 
     for i in range(parts):
         start = i * max_seconds
         duration = min(max_seconds, total_seconds - start)
 
         output = video_output.replace(".mp4", f"_part{i+1}.mp4")
+        print(duration, parts)
 
         subprocess.run([
             "ffmpeg",
@@ -133,7 +135,7 @@ def create_video(image):
         ], check=True)
 
         print(f"Video part {i+1} done: {output}")
-    print(f"Video is done: {video_output}")
+    print(f"Video is done.")
 
 
 if __name__ == "__main__":
