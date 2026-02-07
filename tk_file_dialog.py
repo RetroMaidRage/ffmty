@@ -11,7 +11,7 @@ def CreateFileDialog_Open():
 
         print("File opened: ", f_path)
     else:
-        print("Cancel.")
+        pass
     return f_path
 
 def CreateFileDialog_OpenFolder():
@@ -22,7 +22,7 @@ def CreateFileDialog_OpenFolder():
     if directory_folder_path:
         print("Directory opened: ", directory_folder_path)
     else:
-        print("Cancel.")
+        pass
     return directory_folder_path
 
 def CreateFileDialog_SaveToFolder():
@@ -36,5 +36,5 @@ def CreateFileDialog_SaveToFolder():
     if folder_path:
         print("Saved into: ", folder_path)
     else:
-        print("Cancel.")
+        pass
     return folder_path

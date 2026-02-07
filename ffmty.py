@@ -29,6 +29,7 @@ def check_ffmpeg():
         print("FFmpeg detected:", result.stdout.splitlines()[0])
     except FileNotFoundError:
         print("FFmpeg is not found. Exit")
+        a = input("Press any key to exit...")
         sys.exit(0)
 
 check_ffmpeg()
@@ -104,13 +105,12 @@ def all_mp3_files():
 
     if found == False:
         print("There no .mp3 files.\n")
-        a = input("Press Enter to exit...")
-        if a:
-            sys.exit(0)
+        a = input("Press any key to exit...")
+        sys.exit(0)
 
 def create_mp3():
     all_mp3_files()
-    #list_path = os.path.join(usr_path, f"list_{filename}.txt")
+
     with open(list_path, "w", encoding="utf-8") as f:
         for file in mp3_files:
             nf = os.path.join(usr_path, file)
@@ -131,7 +131,6 @@ def create_video(image):
     max_seconds = 12 * 3599
 
     total_seconds = int(timestamps.overall_duration)
-    #print(total_seconds)
 
     parts = (total_seconds + max_seconds - 1) // max_seconds
     if parts > 1:
@@ -175,6 +174,11 @@ if __name__ == "__main__":
             time.sleep(2)
             #usr_input2 = input("Drag image cover here, then press enter.\n").strip()
             usr_input2 = CreateFileDialog_Open()
+            if not usr_input2:
+                print("Image selection cancelled.")
+                a = input("Press any key to exit...")
+                sys.exit(0)
+
             image = usr_input2
         else:
             print("0.png in this folder will be used as cover.")
