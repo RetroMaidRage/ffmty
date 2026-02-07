@@ -5,7 +5,9 @@ import subprocess
 import time
 import configparser
 import timestamps
+import subprocess
 from tk_file_dialog import  CreateFileDialog_Open, CreateFileDialog_OpenFolder, CreateFileDialog_SaveToFolder
+
 if getattr(sys, 'frozen', False):
     base_path = os.path.dirname(sys.executable)
 else:
@@ -17,6 +19,20 @@ config['Settings'] =    {'Codec': 'h264',
 
 
 #usr_path = input("Enter path there:\n")
+def check_ffmpeg():
+    try:
+        result = subprocess.run(
+            ["ffmpeg", "-version"],
+            capture_output=True,
+            text=True
+        )
+        print("FFmpeg detected:", result.stdout.splitlines()[0])
+    except FileNotFoundError:
+        print("FFmpeg is not found. Exit")
+        sys.exit(0)
+
+check_ffmpeg()
+
 usr_path = CreateFileDialog_OpenFolder()
 
 if not usr_path:
@@ -109,13 +125,13 @@ def create_mp3():
         "-i", list_path,
         "-c", "copy",
         mp3_output
-    ], check=True)
+    ], encoding="utf-8", check=True)
 
 def create_video(image):
     max_seconds = 12 * 3599
 
     total_seconds = int(timestamps.overall_duration)
-    print(total_seconds)
+    #print(total_seconds)
 
     parts = (total_seconds + max_seconds - 1) // max_seconds
     if parts > 1:
@@ -126,7 +142,7 @@ def create_video(image):
         duration = min(max_seconds, total_seconds - start)
 
         output = video_output.replace(".mp4", f"_part{i+1}.mp4")
-        print(duration, parts)
+    #    print(duration, parts)
 
         subprocess.run([
             "ffmpeg",
@@ -144,7 +160,7 @@ def create_video(image):
             "scale=1920:1080:force_original_aspect_ratio=decrease,"
             "pad=1920:1080:(ow-iw)/2:(oh-ih)/2",
             output
-        ], check=True)
+        ], encoding="utf-8", check=True)
 
         print(f"Video part {i+1} done: {output}")
     print(f"Video is done.")
@@ -152,8 +168,8 @@ def create_video(image):
 
 if __name__ == "__main__":
     create_mp3()
-    usr_input = input("Do you want to make video now? \n1 - Yes\n2 - No\n")
-    if usr_input == "1":
+    usr_input = input("Do you want to make video now? \n1/y - Yes\n2/n - No\n")
+    if usr_input == "1" or "y":
         if not os.path.exists(image):
             print("0.png is not found. Please select image.")
             time.sleep(2)
