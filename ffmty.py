@@ -5,7 +5,7 @@ import subprocess
 import time
 import configparser
 import timestamps
-
+from tk_file_dialog import  CreateFileDialog_Open, CreateFileDialog_OpenFolder, CreateFileDialog_SaveToFolder
 if getattr(sys, 'frozen', False):
     base_path = os.path.dirname(sys.executable)
 else:
@@ -14,6 +14,17 @@ else:
 config = configparser.ConfigParser()
 config['Settings'] =    {'Codec': 'h264',
                          'Presset': 'fast'}
+
+
+#usr_path = input("Enter path there:\n")
+usr_path = CreateFileDialog_OpenFolder()
+
+if not usr_path:
+    print("Folder selection cancelled.")
+    sys.exit(0)
+
+usr_path = os.path.abspath(usr_path)
+selected_folder = os.path.basename(usr_path)
 
 filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -24,11 +35,11 @@ os.makedirs(output_folder, exist_ok=True)
 os.makedirs(render_folder, exist_ok=True)
 
 config_path = os.path.join(base_path, "ffmty/settings.ini")
-list_path = os.path.join(base_path, f"ffmty/output/list_{filename}.txt")
-mp3_output = os.path.join(base_path, f"ffmty/render/output_{filename}.mp3")
-video_output = os.path.join(base_path, f"ffmty/render/output_{filename}.mp4")
-timestamps_path = os.path.join(base_path, f"ffmty/output/timestamps_{filename}.txt")
-image = os.path.join(base_path, "0.png")
+list_path = os.path.join(base_path, f"ffmty/output/list_{selected_folder}_{filename}.txt")
+mp3_output = os.path.join(base_path, f"ffmty/render/{selected_folder}_{filename}.mp3")
+video_output = os.path.join(base_path, f"ffmty/render/{selected_folder}_{filename}.mp4")
+timestamps_path = os.path.join(base_path, f"ffmty/output/timestamps_{selected_folder}_{filename}.txt")
+image = os.path.join(base_path, "ffmty/0.png")
 
 
 if os.path.isfile(config_path):
@@ -58,7 +69,7 @@ print(f"\nCodec: {codec}\nPresset: {presset}")
 
 def all_mp3_files():
 
-    path = base_path
+    path = usr_path
 
     if len(sys.argv) > 1:
         path = sys.argv[1]
@@ -83,10 +94,11 @@ def all_mp3_files():
 
 def create_mp3():
     all_mp3_files()
-
+    #list_path = os.path.join(usr_path, f"list_{filename}.txt")
     with open(list_path, "w", encoding="utf-8") as f:
         for file in mp3_files:
-            f.write(f"file '{os.path.abspath(file)}'\n")
+            nf = os.path.join(usr_path, file)
+            f.write(f"file '{os.path.abspath(nf)}'\n")
 
     timestamps.create_timestamps(list_path, filename, base_path, timestamps_path)
     time.sleep(2)
@@ -143,8 +155,10 @@ if __name__ == "__main__":
     usr_input = input("Do you want to make video now? \n1 - Yes\n2 - No\n")
     if usr_input == "1":
         if not os.path.exists(image):
-            print("0.png is not found.")
-            usr_input2 = input("Drag image cover here, then press enter.\n").strip()
+            print("0.png is not found. Please select image.")
+            time.sleep(2)
+            #usr_input2 = input("Drag image cover here, then press enter.\n").strip()
+            usr_input2 = CreateFileDialog_Open()
             image = usr_input2
         else:
             print("0.png in this folder will be used as cover.")
